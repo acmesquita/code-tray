@@ -40,13 +40,12 @@ app.on('ready', () => {
 		}
 	])
 
-	tray.setToolTip('This is my application.')
 	tray.setContextMenu(contextMenu)
 
 })
 
 function open_project(path){
-	spawn.sync('code', [path])
+	spawn('code', [path])
 }
 
 // function clicou(){
