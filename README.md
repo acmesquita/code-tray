@@ -7,9 +7,10 @@ Criando um menu pros robôs
 * [x] Adicionar projetos ao menu
 * [x] Criar função para abrir o menu no vscode
 * [x] Configurar electron-builder para linux
-* [ ] Criar submenus para:
-    * [ ] Abrir o projeto
-    * [ ] Remover o projeto
+* [x] Criar submenus para:
+    * [x] Abrir o projeto
+    * [x] Remover o projeto
+* [x] Fechar o Code Tray
 
 #### Criar *.deb
 
