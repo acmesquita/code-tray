@@ -11,66 +11,78 @@ const schema = {
 };
 
 const store = new Store({ schema });
+
+let mainTray = null
 // store.clear()
-app.on('ready', () => {
-	const tray = new Tray(resolve(__dirname, 'asserts', 'icon.png'))
+
+function render(tray = mainTray){
 	const storedProjects = store.get('projects')
 	const projects = storedProjects ? JSON.parse(storedProjects) : []
 
 	// Adicionando os projetos já cadastrados no menu
-	const items = projects.map((project) => {
-		return { label: project.name, type: 'normal', click: () => open_project([project.path]) }
-	});
+	const items = projects.map((project) => ({
+		label: project.name,
+		submenu:[
+			{
+				label: 'Abrir no VSCode',
+				click: () => {
+					open_project([project.path])
+				},
+			},
+			{
+				label: 'Remove',
+				click: () => {
+					store.set('projects', JSON.stringify(projects.filter(item => item.path !== project.path)));
+
+					render();
+				}
+			}
+		]
+	}));
 
 	const contextMenu = Menu.buildFromTemplate([
-		...items,
-		{ type: 'separator' },
 		{
 			label: 'Add Project',
 			click: () => {
-				const [path] = dialog.showOpenDialog({ properties: ['openDirectory'] });
+				const result = dialog.showOpenDialog({ properties: ['openDirectory'] });
+
+				if (!result) return 
+				const [path] = result
+				const name = basename(path)
 
 				store.set('projects', JSON.stringify([...projects, {
 					path,
-					name: basename(path)
+					name
 				}]));
 
-				contextMenu.append(new MenuItem({ label: basename(path), click: () => open_project([path])}))
+				render();
 			}
+		},
+		{ type: 'separator' },
+		...items,
+		{
+			label: 'Fechar Code Tray',
+			type: 'normal',
+			role:'quit',
+			enabled: true
 		}
 	])
 
 	tray.setContextMenu(contextMenu)
-
-})
-
-function open_project(path){
-	spawn('code', [path])
 }
 
-// function clicou(){
+app.on('ready', () => {
+	mainTray = new Tray(resolve(__dirname, 'asserts', 'icon.png'))
 
-//     prompt({
-//         title: 'Rastreamento do correios',
-//         label: 'Código:',
-//         value: '',
-//         inputAttrs: {
-//             type: 'text'
-//         }
-//     })
-//     .then((r) => {
-//         if(r === null) {
-//             console.log('user cancelled');
-//         } else {
-//             console.log('result', r);
-//             let text = robot(code)
-//             dialog.showMessageBox(null, 
-//                     {title: 'Infomações',
-//                     buttons: ['OK'],
-//                     message: text}
-//             )
+	render(mainTray)
+})
 
-//         }
-//     })
-//     .catch(console.error);
-// }
+function open_project([path]){
+	spawn('code', [path], {
+		cwd: process.cwd(),
+		env: {
+			PATH: process.env.PATH,
+		},
+		stdio: 'inherit',
+	});
+}
