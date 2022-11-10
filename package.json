@@ -18,7 +18,7 @@
   "dependencies": {
     "electron-store": "^4.0.0",
     "cross-spawn": "^6.0.5",
-    "electron": "^5.0.7"
+    "electron": "^18.3.7"
   },
   "devDependencies": {
     "electron-installer-debian": "^2.0.0",
